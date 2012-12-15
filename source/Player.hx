@@ -20,7 +20,7 @@ class Player extends FlxSprite
 		FlxControl.player1.setCursorControl(false, false, true, true);
 
 		FlxControl.player1.setJumpButton("UP", FlxControlHandler.KEYMODE_PRESSED, 200, FlxObject.FLOOR, 250, 200);
-		FlxControl.player1.setMovementSpeed(800, 0, 100, 200, 400, 0);
+		FlxControl.player1.setMovementSpeed(800, 0, 200, 200, 400, 0);
 		FlxControl.player1.setGravity(0, 400);
 	}
 }
