@@ -7,6 +7,7 @@ import org.flixel.FlxPoint;
 import org.flixel.FlxSprite;
 import org.flixel.FlxGroup;
 import org.flixel.FlxLayer;
+import org.flixel.FlxObject;
 
 import org.flixel.plugin.photonstorm.FlxSpecialFX;
 import org.flixel.plugin.photonstorm.fx.StarfieldFX;
@@ -29,6 +30,7 @@ class PlayState extends FlxState
 	var starfield:StarfieldFX;
 
 	var buildings:FlxGroup;
+	var presents:FlxGroup;
 	var player:Player;
 	var bg:FlxLayer;
 	var action:FlxLayer;
@@ -38,10 +40,13 @@ class PlayState extends FlxState
 	var currentFrontier:Int;
 	var lastHeight:Int;
 
+	var simultaneousPresents:Int;
+
 	override public function create():Void
 	{
 		currentFrontier = 0;
 		lastHeight = 40;
+		simultaneousPresents = 1;
 
 		bg = new FlxLayer("Background");
 		action = new FlxLayer("Action");
@@ -61,6 +66,7 @@ class PlayState extends FlxState
 
 		starfield.setSpeed(1);
 		starfield.setStarSpeed ( 0, 0 );
+		starfield.setBackgroundColor(0xFF001133);
 
 		stars.scrollFactor = new FlxPoint(0,0);
 
@@ -68,12 +74,16 @@ class PlayState extends FlxState
 		add(stars);
 
 		buildings = new FlxGroup();
+		presents = new FlxGroup();
+
 		player = new Player(10, 0);
 
 		action.add(buildings);
 		add(buildings);
 		action.add(player);
 		add(player);
+		action.add(presents);
+		add(presents);
 
 		generateLevelUntil(2000);
 
@@ -91,6 +101,10 @@ class PlayState extends FlxState
 
 		lastCameraPos.copyFrom(FlxG.camera.scroll);
 
+		var p:Present = new Present(100, 10);
+
+		presents.add(p);
+
 		super.create();
 	}
 
@@ -104,6 +118,27 @@ class PlayState extends FlxState
 
 		FlxG.collide(player, buildings);
 
+		//TODO - Update distance to presents indicators
+
+		FlxG.overlap(player, presents, catchPresent);
+
+		controlStarMovement();
+	}
+
+	private function catchPresent(player:FlxObject, present:FlxObject):Void
+	{
+		presents.remove(present);
+		present.kill();
+
+		generatePresent();
+	}
+
+	private function generatePresent():Void{
+
+	}
+
+	private function controlStarMovement():Void
+	{
 		var starSpeedX:Float = 0;
 		var starSpeedY:Float = 0;
 
@@ -121,10 +156,6 @@ class PlayState extends FlxState
 		lastCameraPos.copyFrom(FlxG.camera.scroll);
 
 		starfield.setStarSpeed(starSpeedX, starSpeedY);
-	}
-
-	private function checkNeedMoreBuildings():Void
-	{
 	}
 
 	private function generateLevelUntil(X:Int):Void
