@@ -3,8 +3,13 @@ package;
 import org.flixel.FlxG;
 
 import org.flixel.FlxState;
+import org.flixel.FlxPoint;
+import org.flixel.FlxSprite;
 import org.flixel.FlxGroup;
+import org.flixel.FlxLayer;
 
+import org.flixel.plugin.photonstorm.FlxSpecialFX;
+import org.flixel.plugin.photonstorm.fx.StarfieldFX;
 import org.flixel.plugin.photonstorm.FlxMath;
 
 class PlayState extends FlxState
@@ -21,8 +26,14 @@ class PlayState extends FlxState
 
 	static var GENERATION_WINDOW = 640;
 
+	var starfield:StarfieldFX;
+
 	var buildings:FlxGroup;
 	var player:Player;
+	var bg:FlxLayer;
+	var action:FlxLayer;
+
+	var lastCameraPos:FlxPoint;
 
 	var currentFrontier:Int;
 	var lastHeight:Int;
@@ -32,11 +43,37 @@ class PlayState extends FlxState
 		currentFrontier = 0;
 		lastHeight = 40;
 
-		buildings = new FlxGroup();
-		player = new Player(10, 150);
+		bg = new FlxLayer("Background");
+		action = new FlxLayer("Action");
 
-		this.add(buildings);
-		this.add(player);
+		addLayer(bg);
+		addLayer(action);
+
+		//this.add();
+		if (FlxG.getPlugin(FlxSpecialFX) == null)
+		{
+   			FlxG.addPlugin(new FlxSpecialFX());
+		}
+
+		starfield = FlxSpecialFX.starfield();
+
+		var stars:FlxSprite = starfield.create(0, 0, 320, 240, 100);
+
+		starfield.setSpeed(1);
+		starfield.setStarSpeed ( 0, 0 );
+
+		stars.scrollFactor = new FlxPoint(0,0);
+
+		bg.add(stars);
+		add(stars);
+
+		buildings = new FlxGroup();
+		player = new Player(10, 0);
+
+		action.add(buildings);
+		add(buildings);
+		action.add(player);
+		add(player);
 
 		generateLevelUntil(2000);
 
@@ -50,6 +87,10 @@ class PlayState extends FlxState
 
 		FlxG.camera.setBounds(0, -240, 100000000, 480);
 
+		lastCameraPos = new FlxPoint(0,0);
+
+		lastCameraPos.copyFrom(FlxG.camera.scroll);
+
 		super.create();
 	}
 
@@ -62,6 +103,24 @@ class PlayState extends FlxState
 		}
 
 		FlxG.collide(player, buildings);
+
+		var starSpeedX:Float = 0;
+		var starSpeedY:Float = 0;
+
+		if(lastCameraPos.x < FlxG.camera.scroll.x){
+			starSpeedX = -0.1;
+		}else if(lastCameraPos.x > FlxG.camera.scroll.x){
+			starSpeedX = 0.1;
+		}
+
+		if(lastCameraPos.y < FlxG.camera.scroll.y){
+			starSpeedY = -0.1;
+		}else if(lastCameraPos.x > FlxG.camera.scroll.x){
+			starSpeedY = 0.1;
+		}
+		lastCameraPos.copyFrom(FlxG.camera.scroll);
+
+		starfield.setStarSpeed(starSpeedX, starSpeedY);
 	}
 
 	private function checkNeedMoreBuildings():Void
