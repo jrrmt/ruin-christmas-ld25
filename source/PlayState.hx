@@ -27,10 +27,14 @@ class PlayState extends FlxState
 
 	static var GENERATION_WINDOW = 640;
 
+	static var MARKER_CACHE_SIZE = 16; //For each side
+
 	var starfield:StarfieldFX;
 
 	var buildings:FlxGroup;
 	var presents:FlxGroup;
+	var leftMarkers:FlxGroup;
+	var rightMarkers:FlxGroup;
 	var player:Player;
 	var bg:FlxLayer;
 	var action:FlxLayer;
@@ -105,6 +109,8 @@ class PlayState extends FlxState
 
 		presents.add(p);
 
+		initMarkers();
+
 		super.create();
 	}
 
@@ -122,7 +128,54 @@ class PlayState extends FlxState
 
 		FlxG.overlap(player, presents, catchPresent);
 
+		updateMarkers();
+
 		controlStarMovement();
+	}
+
+	private function initMarkers(){
+		leftMarkers = new FlxGroup();
+		rightMarkers = new FlxGroup();
+
+		action.add(leftMarkers);
+		add(leftMarkers);
+		action.add(rightMarkers);
+		add(rightMarkers);
+
+		for(i in 0...MARKER_CACHE_SIZE){
+			leftMarkers.add(new Marker(Marker.LEFT));
+			rightMarkers.add(new Marker(Marker.RIGHT));
+		}
+
+		leftMarkers.callAll("disappear");
+		rightMarkers.callAll("disappear");
+	}
+
+	private function updateMarkers():Void
+	{
+		var leftUsed:Int = 0;
+		var rightUsed:Int = 0;
+
+		leftMarkers.callAll("disappear");
+		rightMarkers.callAll("disappear");
+
+		for(p in presents.members){
+			var pres:Present = cast(p, Present);
+			if(pres.x < FlxG.camera.scroll.x){
+				var m:Marker = cast(leftMarkers.members[leftUsed], Marker);
+				
+				m.visible = true;
+				m.y = pres.y;
+
+				leftUsed++;
+			}else if(pres.x > FlxG.camera.scroll.x + 320){
+				var m:Marker = cast(rightMarkers.members[rightUsed], Marker);
+				m.visible = true;
+				m.y = pres.y;
+
+				rightUsed++;
+			}
+		}
 	}
 
 	private function catchPresent(player:FlxObject, present:FlxObject):Void
@@ -134,7 +187,13 @@ class PlayState extends FlxState
 	}
 
 	private function generatePresent():Void{
+		var newX:Int; 
 
+		for(i in 0...simultaneousPresents){
+			newX = FlxMath.rand(player.x - 400 > 0 ? player.x - 400: 0, player.x + 400);
+			presents.add(new Present(newX, 10));
+		}
+		
 	}
 
 	private function controlStarMovement():Void
