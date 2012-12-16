@@ -22,7 +22,7 @@ class PlayState extends FlxState
 
 	static var MIN_HEIGHT = 40;
 	static var MAX_HEIGHT = 300;
-	static var HEIGHT_INTERVAL = 80;
+	static var HEIGHT_INTERVAL = 50;
 
 	static var GENERATION_WINDOW = 640;
 
@@ -138,6 +138,8 @@ class PlayState extends FlxState
 				newHeight = lastHeight + FlxMath.rand(-HEIGHT_INTERVAL, HEIGHT_INTERVAL);
 			}
 
+			lastHeight = newHeight;
+
 			var newBuilding = new Building(currentFrontier, 240 - newHeight, newWidth, newHeight);
 			buildings.add(newBuilding);
 
@@ -145,12 +147,5 @@ class PlayState extends FlxState
 			currentFrontier += newInterval;
 		}
 
-		/*for(i in 0...10){
-			var newBuilding = new Building(i*50, 200 - i*20, 45, 40 + i*20);
-
-			buildings.add(newBuilding);
-
-			FlxG.log("Making builing at "+(i*50));
-		}*/
 	}
 }
